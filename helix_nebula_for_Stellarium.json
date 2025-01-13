@@ -1,0 +1,8 @@
+	{
+		"imageCredits" : {"Short": "McCallie", "infoUrl": ""},
+		"imageUrl" : "helix_nebula_for_Stellarium.png",
+		"worldCoords" : [[[337.5925, -21.0130], [337.2145, -21.0142], [337.2153, -20.6609], [337.5914, -20.6614]]],
+		"textureCoords" : [[[0,0], [1,0], [1,1], [0,1]]],
+		"minResolution" : 0.2,
+		"maxBrightness" : 12.0
+	},

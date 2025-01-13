@@ -1,0 +1,86 @@
+// Stellarium script for a monthly sky tour
+// Written for Stellarium's JavaScript-based scripting engine
+
+// Helper function to pause execution for a specified time
+function wait(seconds) {
+    core.wait(seconds);
+}
+
+// Function to display a target, zoom in, show description, then zoom out
+function showTarget(targetName, ra, dec, description) {
+    // Center the target in view
+    core.selectObjectByName(targetName);
+    StelMovementMgr.zoomTo(2.0, 2); // Zoom out to show constellations
+    core.wait(2); // Wait for zoom-out transition
+    StelMovementMgr.zoomTo(20.0, 5); // Slowly zoom in on the target
+    StelMovementMgr.moveToRaDec(ra, dec, 5); // Smoothly pan to the target
+    core.wait(5); // Wait for zoom and pan to complete
+
+    // Display description on screen
+    core.setText(description);
+    core.wait(10); // Wait to display the text
+
+    // Zoom back out
+    StelMovementMgr.zoomTo(2.0, 3);
+    core.wait(3); // Wait for zoom-out
+}
+
+// Set the observer's location and time for a specific month
+function setMonthTime(year, month) {
+    core.setObserverLocation("Louisburg, KS", -94.6808, 38.6195, 300, 0); // Louisburg, KS
+    core.setDate(year + "-" + month + "-15T22:00:00", "local"); // Middle of the month at 10 PM Central Time
+    core.wait(1);
+}
+
+// Monthly targets
+function januaryTour() {
+    setMonthTime(2025, "01");
+    showTarget("M42 (Orion Nebula)", 83.8, -5.4, "M42, the Orion Nebula, is a stellar nursery in the constellation Orion.");
+    showTarget("M45 (Pleiades)", 56.8, 24.1, "M45, the Pleiades, is an open star cluster in Taurus.");
+    showTarget("Sirius", 101.3, -16.7, "Sirius, the brightest star in the night sky, is located in Canis Major.");
+}
+
+function februaryTour() {
+    setMonthTime(2025, "02");
+    showTarget("M44 (Beehive Cluster)", 130.0, 19.7, "M44, the Beehive Cluster, is an open cluster in Cancer.");
+    showTarget("M41", 101.5, -20.7, "M41 is an open cluster near Sirius in Canis Major.");
+    showTarget("Castor", 113.7, 31.9, "Castor is a beautiful binary star system in Gemini.");
+}
+
+// Repeat for remaining months with representative targets
+function marchTour() {
+    setMonthTime(2025, "03");
+    showTarget("M81 (Bode's Galaxy)", 149.0, 69.1, "M81, Bode's Galaxy, is a bright spiral galaxy in Ursa Major.");
+    showTarget("M82 (Cigar Galaxy)", 149.4, 69.7, "M82, the Cigar Galaxy, is a starburst galaxy near Bode's Galaxy.");
+    showTarget("Regulus", 152.1, 12.0, "Regulus is the brightest star in Leo, known as the heart of the lion.");
+}
+
+// Add tours for April to December
+function aprilTour() {
+    setMonthTime(2025, "04");
+    showTarget("M51 (Whirlpool Galaxy)", 202.0, 47.2, "M51, the Whirlpool Galaxy, is a stunning spiral galaxy in Canes Venatici.");
+    showTarget("M3 (Globular Cluster)", 205.5, 28.4, "M3 is a bright globular cluster in Canes Venatici.");
+    showTarget("Arcturus", 213.9, 19.2, "Arcturus is the brightest star in the constellation Boötes.");
+}
+
+// Continue adding representative objects for the remaining months...
+// May through December
+
+// Main function to orchestrate the sky tour
+function main() {
+    core.setObserverLocation("Louisburg, KS", -94.6808, 38.6195, 300, 0); // Set the observer's location
+    core.setTimeRate(0); // Pause time progression
+    core.wait(1);
+
+    januaryTour();
+    februaryTour();
+    marchTour();
+    aprilTour();
+    // Add remaining monthly tour calls here...
+
+    core.setText("Tour Complete! Enjoy the night sky.");
+    core.wait(5);
+}
+
+// Start the script
+main();
