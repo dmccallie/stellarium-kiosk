@@ -1,0 +1,521 @@
+
+// script to cycle through key DSOs for Powell Observatory, ASKC
+// David McCallie Jr Jr
+
+function zoomToObject(objName, fov, zoom_duration, linger_duration)  {
+	core.setSelectedObjectInfo("None");
+	core.selectObjectByName(objName, true);
+
+	map = core.getSelectedObjectInfo();
+	if  (map.found == false) {
+		core.debug("DSO was not found!");
+	 }  else {
+		// core.debug(core.mapToString(map));
+		core.debug("found object name  = " + map['localized-name']);
+	}
+	
+	info_name = map['localized-name'] ;
+	showULCLabel( info_name, "A big something or other blah blah blah", "Photo by ????") ;
+
+	StelMovementMgr.setFlagTracking(true);
+	
+	core.moveToSelectedObject(1); // duration (like a "slew to" - sets direction)
+	// core.wait(1);
+	
+	StelMovementMgr.zoomTo(fov, zoom_duration);  //zoom in towards target fov, duration
+	// core.wait(0.5)
+	
+
+	core.wait(zoom_duration );
+
+	id = LabelMgr.labelObject(map['localized-name'], objName, true, 36, "#ffff00","S", -1, "TextOnly" , true, 0);
+	core.wait(linger_duration);  // sets how long to see it up close
+
+	LabelMgr.deleteLabel(id);
+}
+
+function zoomToHome(duration, azi) {
+
+	// core.wait(duration);
+	StelMovementMgr.zoomTo(zoom_out_FOV, duration);  // fov, duration - zooms out to wide field at cur azi, alt
+	core.wait(1.5)
+	deleteULCLabel();
+	core.moveToAltAzi("42", azi);  // alt, azi -  sets south-facing and upward (ground shows a bit)
+	core.wait(duration -1);
+	//core.moveToAltAzi("25", azi);  // alt, azi -  sets south-facing and upward (ground shows a bit)
+	// core.wait(duration);
+}
+
+// global vars for label control
+var oname = -1;
+var desc = -1;
+var cr = -1;
+
+var zoom_out_FOV = "120"
+
+function showULCLabel( objName, description, credits) {
+	//  x,    y,    visible, fontsize, color, autoDelete, timer
+	oname = LabelMgr.labelScreen(objName, 20, 20, true, 40, "#ffff00", false, 0);
+	LabelMgr.setLabelShow(oname, true);
+	
+	desc = LabelMgr.labelScreen(description, 20, 65, true, 32, "#ffff00", false, 0);
+	LabelMgr.setLabelShow(desc, true);
+
+	if ( credits.length > 0) {
+		cr = LabelMgr.labelScreen(credits, 20, 100, true, 26, "#ffff00", false, 0);
+		LabelMgr.setLabelShow(cr, true);
+	} else {
+		cr = -1;
+	}
+}
+
+function deleteULCLabel() {
+	if (oname != -1) {
+		LabelMgr.deleteLabel(oname);
+		oname = -1;
+	}
+	if (desc != -1) {
+		LabelMgr.deleteLabel(desc);
+		desc = -1;
+	}
+	if (cr != -1) {
+		LabelMgr.deleteLabel(cr);
+		cr = -1;
+	}
+}
+
+targets = [
+
+	// Jan
+	{objName: "M42", fov:3.0, obsDt: "2024-01-15T18:54:00" },
+	{objName: "Flame Nebula",fov:2.0,  obsDt: "2024-01-15T18:54:00" },
+	{objName: "Rosette Nebula",fov:2.0,  obsDt: "2024-01-15T18:54:00" },
+
+	// feb 7:25 ST
+	{objName: "Elephant's Trunk Nebula", fov:3.0, obsDt: "2024-02-15T19:25:00" },
+	{objName: "The Wizard Nebula",fov:2.0,  obsDt: "2024-02-15T19:25:00" },
+	{objName: "California Nebula",fov:3.0,  obsDt: "2024-02-15T19:25:00" },
+
+
+	// AD = 8:55 DST // sep 10p,
+	{objName: "M13", fov:2.0, obsDt: "2024-09-15T20:55:00" },
+	{objName: "M101", fov:2.0, obsDt: "2024-09-15T20:55:00" },
+	{objName: "Heart Nebula", fov:3.0, obsDt: "2024-09-15T20:55:00" },
+
+
+	// oct ad = 8:07 DST
+	{objName: "M57", fov:0.5, obsDt: "2024-10-15T20:07:00" },
+	{objName: "M27", fov:0.5, obsDt: "2024-10-15T20:07:00" },
+
+
+	// nov ad= 6:36 ST
+	{objName: "Helix Nebula", fov:2.0, obsDt: "2024-11-15T18:36:00" },
+	{objName: "M15", fov:2.0, obsDt: "2024-11-15T18:36:00" },
+
+
+	// dec
+	{objName: "M31", fov:3.0, obsDt: "2024-12-15T18:54:00" },
+	{objName: "M45", fov:2.5, obsDt: "2024-12-15T18:54:00" },
+	{objName: "Heart Nebula", fov:3.0, obsDt: "2024-12-15T18:54:00" },
+
+ ];
+
+// data for constellation-driven tour
+var constellation_tour = [
+	{   obsDt: "2024-02-15T21:00:00", 
+        display: "Winter", 
+		constellations: [
+            {
+			name: "Orion", 
+			targets: [
+				{ objName: "M42", fov: 3.0, altName: "Orion Nebula" },
+				{ objName: "NGC 1977", fov: 2.0, altName: "Running Man" },
+				{ objName: "Flame Nebula", fov: 2.0, altName: "" },
+				{ objName: "Horsehead Nebula", fov: 2.0, altName: "" }
+			    ],
+            },
+            {
+			name: "Taurus",
+			targets: [
+				{ objName: "M45", fov: 3.0, altName: "Pleiades" },
+				{ objName: "M1", fov: 2.0, altName: "Crab Nebula" }
+			    ]
+            } // constellation 
+        ] // constellations
+    }, // end tour stop
+
+    {   obsDt: "2024-05-15T22:00:00",
+        display: "Spring",
+        constellations: [
+            {
+            name: "Virgo",
+            targets: [
+                { objName: "M84", fov: 2.0, altName: "Markarian's Chain" },
+                { objName: "M87", fov: 2.0, altName: "Virgo Galaxy" },
+                { objName: "NGC 4438", fov: 2.0, altName: "The Eyes" },
+                { objName: "M90", fov: 2.0, altName: "" },
+                { objName: "M99", fov: 2.0, altName: "Virgo Pinwheel" },
+                { objName: "M104", fov: 2.0, altName: "Sombrero" }
+                ]
+            },
+            {
+            name: "Coma Berenices",
+            targets: [
+                { objName: "M64", fov: 2.0, altName: "Blackeye" },
+                { objName: "M53", fov: 2.0, altName: "" },
+                { objName: "M98", fov: 2.0, altName: "" }
+                ]
+            },
+            {
+            name: "Canes Venatici",
+            targets: [
+                { objName: "M51", fov: 2.0, altName: "Whirlpool" },
+                { objName: "M63", fov: 2.0, altName: "Sunflower" },
+                { objName: "M3", fov: 2.0, altName: "" },
+                { objName: "M94", fov: 2.0, altName: "Croc's Eye" },
+                { objName: "NGC 4631", fov: 2.0, altName: "Whale" }
+                ]
+            },
+            {
+            name: "Ursa Major",
+            targets: [
+                { objName: "M81", fov: 2.0, altName: "Bode" },
+                { objName: "M82", fov: 2.0, altName: "Cigar" },
+                { objName: "M97", fov: 2.0, altName: "Owl" },
+                { objName: "M101", fov: 2.0, altName: "Pinwheel" }
+                ]
+            },
+            {
+            name: "Leo",
+            targets: [
+                { objName: "NGC 3628", fov: 2.0, altName: "Hamburger" },
+                { objName: "M66", fov: 2.0, altName: "Leo Triplet" }
+                ]
+            },
+            {
+            name: "Cancer",
+            targets: [
+                { objName: "M44", fov: 2.0, altName: "Beehive Cluster" }
+                ]
+            },
+            {
+            name: "Lynx",
+            targets: [
+                ]
+            },
+            {
+            name: "Gemini",
+            targets: [
+                ]
+            },
+            {
+            name: "Ursa Minor",
+            targets: [
+                ]
+            }
+        ] // constellations
+
+    }, // end tour stop
+
+] // constellation_tour
+
+
+var lastObsDt = "empty"	// keep track of when obs_date changes
+
+function showTarget( t ) {
+	zoom_in_duration = 4.0;
+	linger_duration = 3.0;
+	zoom_home_duration = 3.5;
+
+	core.debug("---------------------------------\n");
+	core.debug("Start show target for " + t.objName)
+
+	// first time, set lastObsDt
+	if (lastObsDt == "empty") {
+		lastObsDt = t.obsDt;
+		core.debug("lastObsDt set for first time");
+ 		core.setDate(t.obsDt, "local");
+	}
+	
+	// if this is new ObsDt, set new ObsDt and  reset our horizons
+	core.debug("\nlastObsDt = " + lastObsDt);
+	core.debug("new t.ObsDt = " + t.obsDt);
+
+	if (lastObsDt != t.ObsDt) {
+		// set obs date and time
+		// core.setDate(t.obsDt, "local");
+		numDays = Math.trunc(core.jdFromDateString( t.obsDt ,"local") - core.jdFromDateString( lastObsDt ,"local" ));
+		core.debug("\nNumDays = " + numDays);
+		transitionDays(numDays, "42", "180" );
+		lastObsDt = t.obsDt;
+		//core.moveToAltAzi("42", "180");
+	}
+
+	// zoom in to object
+	zoomToObject(t.objName, t.fov, zoom_in_duration, linger_duration);
+	
+	// zoom back home at same alt/azi
+	curAzi = core.getViewAzimuthAngle();
+	zoomToHome(zoom_home_duration, curAzi);
+
+	core.debug("---------------------------------\n");
+	core.debug("END show target for " + t.objName)
+}
+
+
+function transitionDays(numDays, alt, azi) {
+	
+	for (k=0; numDays > k; k++) {
+		core.setDate("+1 day", "local");
+		core.moveToAltAzi(alt, azi); 
+		core.wait(0.15);
+
+	}
+	core.wait(1);  // pause before next targets
+}
+
+function showAllTargets( targets ) {
+	for(i=0;  targets.length > i;  i++)  {
+		showTarget(targets[i]);
+	}
+}
+
+function runConstellationTour( tour ) {
+	// initialize
+	core.setSkyCulture("western");
+	ConstellationMgr.deselectConstellations();  // clear list of constellations
+	ConstellationMgr.setFlagLines(true);
+	ConstellationMgr.setFlagArt(false);
+
+	var sh  = core.getScreenHeight();
+	var sw = core.getScreenWidth();
+
+	// for each "tour date" ---
+	for (its = 0; tour.length > its; its++) {
+		
+		tour_stop = tour[its];
+		
+		core.debug("tour date = " +  tour_stop.obsDt);
+		// set obsDt to tour stop
+		core.setDate(tour_stop.obsDt, "local");
+		
+		// slew to south an aim view upwards
+		core.moveToAltAzi("42", "180");  // alt, azi -> sets south-facing and upward (ground shows a bit)
+
+		// slowly zoom out to wide view of sky
+		StelMovementMgr.zoomTo(zoom_out_FOV, 1.5);  // fov, duration
+		
+		var season = LabelMgr.labelScreen("Season: " + tour_stop.display,  sw/2 - 150, sh/2 - 50, false, 85);   //w,h,,font
+		LabelMgr.setLabelShow(season, true);
+		
+		core.wait(1.5);
+		LabelMgr.deleteLabel(season);
+		
+
+		// display stop name in main screen center
+		core.debug("Tour stop display = " + tour_stop.display);
+		// core.wait(5);
+
+		// loop through each constellation for this tour stop
+		constellations = tour_stop.constellations;
+		for (cons_ndx=0;  constellations.length > cons_ndx;  cons_ndx++) {
+			constellation = constellations[cons_ndx];
+			core.debug("show constellation = " + constellation.name);
+
+			ConstellationMgr.deselectConstellations();  // clear list of constellations
+			core.selectConstellationByName(constellation.name);  // NOTE THIS IS CORE not ConstellationMgr????
+
+			var cname = LabelMgr.labelScreen(constellation.name,  sw/2 - 100, sh/2 - 50, false, 75);   //w,h,,font
+			LabelMgr.setLabelShow(cname, true);
+		
+
+			core.moveToSelectedObject(2.0);
+			ConstellationMgr.setFlagArt(true);
+			core.wait(2.0);
+			StelMovementMgr.zoomTo(30, 2.0);  // zoom in to constellation for close view
+			core.wait(2.0);
+
+			// StelMovementMgr.autoZoomIn(2);  //duration (results in tight view)
+			// core.wait(2);
+			// StelMovementMgr.zoomTo(40,8);   // (fov, duration) - back out to 40 deg field
+			//StelMovementMgr.autoZoomOut(2);  //duration (results in tight view)
+			//core.debug("waiting for zoom out");
+			
+			StelMovementMgr.zoomTo(40, 2.0);	 // zoom out for target showing
+			ConstellationMgr.setFlagArt(false);
+			core.wait(2.0);
+
+			LabelMgr.deleteLabel(cname);
+
+			// for each constellation, loop through and show each target
+			targets = constellation.targets;
+			if  (targets.length > 0)  {
+				for (t_ndx=0; targets.length > t_ndx; t_ndx++) {
+					target = targets[t_ndx];
+					core.debug("show target = " + target.objName);		
+
+				} 
+			}
+
+			StelMovementMgr.zoomTo(100,4);   // (fov, duration) -
+			core.wait(4);
+		}
+	}
+}
+runConstellationTour(constellation_tour);
+
+
+core.selectConstellationByName("Orion");  // NOTE THIS IS CORE not ConstellationMgr????
+StelMovementMgr.autoZoomIn(6);  //duration (results in tight view)
+core.wait(1);
+StelMovementMgr.zoomTo(40,8);   // (fov, duration) - back out to 40 deg field
+core.wait(1);
+ConstellationMgr.setFlagArt(true);
+core.wait(5);
+ConstellationMgr.setFlagArt(false);
+
+zoomToObject("Orion Nebula", 3.0, 3.0, 1.0) ;
+core.wait(3.0);
+StelMovementMgr.zoomTo(40, 2.0);  // fov, duration - zooms out to wide field at cur azi, alt
+core.wait(1.5)
+deleteULCLabel();
+
+zoomToObject("NGC 1977", 1.5, 3.0, 1.0) ;   // running man
+core.wait(3.0);
+StelMovementMgr.zoomTo(40, 2.0);  // fov, duration - zooms out to wide field at cur azi, alt
+core.wait(1.5)
+deleteULCLabel();
+}
+
+
+
+function showAllConstellations() {
+	ConstellationMgr.setFlagArt(false);
+	ConstellationMgr.setFlagBoundaries(false);
+	ConstellationMgr.setFlagLines(false);
+	ConstellationMgr.setFlagLabels(false);
+
+	// ConstellationMgr.setFlagArt(false);
+	ConstellationMgr.setFlagBoundaries(false);
+	ConstellationMgr.setFlagLines(true);
+	ConstellationMgr.setFlagLabels(true);
+}
+
+//
+// initialize background contexts and features
+//
+
+LabelMgr.deleteAllLabels();
+core.clear("natural")
+core.setGuiVisible(true);
+core.setDiskViewport(false);
+core.setSelectedObjectInfo("None");
+
+GridLinesMgr.setFlagGridlines(false);
+NebulaMgr.setFlagHints(false);
+StelMovementMgr.setEquatorialMount(false);
+
+// core.setDate("now")
+// core.setDate("2025-01-12T22:00:00", "local")  //or  "2008-03-24T13:21:01"
+
+// set our base observer location
+core.setObserverLocation( -94.6808,  38.6195,  300, 1,"Louisburg, KS", 'Earth'); // long, lat, alt
+// const d = core.getObserverLocationInfo();
+// core.debug(core.mapToString(d));  // "timezone" = "America/Chicago"
+
+// StelMovementMgr.resetInitViewPos();  // this works
+
+// show more stars than baseline
+StelSkyDrawer.setCustomStarMagnitudeLimit(14);
+StelSkyDrawer.setFlagStarMagnitudeLimit(true);
+
+// show compass points
+LandscapeMgr.setFlagCardinalPoints(true);
+LandscapeMgr.setFlagLabels(true);
+// LandscapeMgr.labelFontSize = 42;
+
+// looks best as AltAz mount, otherwise always shows equatorial tilt
+StelMovementMgr.setEquatorialMount(false);  // force alt-az mount motions
+
+// slew to south an aim view upwards
+core.moveToAltAzi("42", "180");  // alt, azi -> sets south-facing and upward (ground shows a bit)
+
+// zoom out to wide view of sky
+StelMovementMgr.zoomTo(zoom_out_FOV, 1.5);  // fov, duration
+core.wait(1.5);
+
+showAllConstellations();
+showAllTargets(targets);
+
+// reset everything - move this to stand-alone script!
+core.setGuiVisible(true);
+core.clear("natural");
+
+
+// jd = Math.trunc(core. jdFromDateString("2024-02-15T20:00:00", "local") - core. jdFromDateString("2024-01-15T20:00:00", "local"));
+// core.debug(jd);
+
+// core.setDate("2025-01-12T22:00:00", "local")
+// ConstellationMgr.deselectConstellations();
+
+// ConstellationMgr.selectConstellation("Orion");
+// ConstellationMgr.setFlagLines(true);
+// ConstellationMgr.setFlagArt(true);
+// core.moveToSelectedObject(3); // duration (like a "slew to" - sets direction)
+// core.wait(3);
+	
+// StelMovementMgr.zoomTo("20", 3);  //zoom in towards target fov, duration
+	// core.wait(0.5)
+
+core.clear("natural");
+ConstellationMgr.deselectConstellations();  // clear list of constellations
+ConstellationMgr.setFlagLines(true);
+ConstellationMgr.setFlagArt(false);
+core.selectConstellationByName("Orion");  // NOTE THIS IS CORE not ConstellationMgr????
+core.debug("selected orion, waiting for zoomin");
+core.moveToSelectedObject(2.0);
+ConstellationMgr.setFlagArt(true);
+core.wait(1.5);
+StelMovementMgr.zoomTo(50, 2.0);
+core.wait(5);
+StelMovementMgr.zoomTo(120, 2.0);
+core.wait(3);
+ConstellationMgr.setFlagArt(false);
+// StelMovementMgr.autoZoomIn(3);  //duration (results in tight view)
+// core.wait(3);
+// StelMovementMgr.autoZoomOut(3);
+// StelMovementMgr.zoomTo(40,8);   // (fov, duration) - back out to 40 deg field
+core.wait(1);
+ConstellationMgr.setFlagArt(true);
+core.wait(5);
+ConstellationMgr.setFlagArt(false);
+
+zoomToObject("Orion Nebula", 3.0, 3.0, 1.0) ;
+core.wait(3.0);
+StelMovementMgr.zoomTo(40, 2.0);  // fov, duration - zooms out to wide field at cur azi, alt
+core.wait(1.5)
+deleteULCLabel();
+
+zoomToObject("NGC 1977", 1.5, 3.0, 1.0) ;   // running man
+core.wait(3.0);
+StelMovementMgr.zoomTo(40, 2.0);  // fov, duration - zooms out to wide field at cur azi, alt
+core.wait(1.5)
+deleteULCLabel();
+
+zoomToObject("Horsehead Nebula", 1.0, 3.0, 1.0) ;
+core.wait(3.0);
+StelMovementMgr.zoomTo(40, 2.0);  // fov, duration - zooms out to wide field at cur azi, alt
+core.wait(1.5)
+deleteULCLabel();
+
+zoomToObject("Flame Nebula", 2.0, 3.0, 1.0) ;
+core.wait(3.0);
+StelMovementMgr.zoomTo(40, 2.0);  // fov, duration - zooms out to wide field at cur azi, alt
+core.wait(1.5)
+deleteULCLabel();
+
+
+
+
+
+// ConstellationMgr.setFlagArt(false);

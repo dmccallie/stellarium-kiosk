@@ -1,0 +1,259 @@
+
+// script to cycle through key DSOs for Powell Observatory, ASKC
+// David McCallie
+
+function zoomToObject(objName, fov)  {
+	core.setSelectedObjectInfo("None");
+	core.selectObjectByName(objName, true);
+
+	map = core.getSelectedObjectInfo();
+	if  (map.found == false) {
+		core.debug("DSO was not found!");
+	 }  else {
+		core.debug(core.mapToString(map));
+		core.debug("found object name  = " + map['localized-name']);
+	}
+	
+	StelMovementMgr.setFlagTracking(true);
+	
+	core.moveToSelectedObject(1); // duration (like a "slew to" - sets direction)
+	core.wait(1);
+	
+	StelMovementMgr.zoomTo(fov, 3);  //zoom in towards target fov, duration
+	core.wait(1)
+	
+	info_name = map['localized-name'] + " Other info here";
+	showULCLabel( info_name, "A big nebula in Orion", "Photo by Someone") ;
+	core.wait(2);
+
+	id = LabelMgr.labelObject(map['localized-name'], objName, true, 36, "#ffff00","S", -1, "TextOnly" , true, 0);
+	core.wait(3);  // sets how long to see it up close
+
+	LabelMgr.deleteLabel(id);
+}
+
+function zoomToHome(duration, azi) {
+	StelMovementMgr.zoomTo(130, duration);  // fov, duration - zooms out to wide field at cur azi, alt
+	core.wait(1)
+	deleteULCLabel();
+	core.wait(duration -1);
+	// core.moveToAltAzi("25", azi);  // alt, azi -  sets south-facing and upward (ground shows a bit)
+	// core.wait(duration);
+}
+
+// global vars for label control
+var oname = -1;
+var desc = -1;
+var cr = -1;
+
+function showULCLabel( objName, description, credits) {
+	//  x,    y,    visible, fontsize, color, autoDelete, timer
+	oname = LabelMgr.labelScreen(objName, 20, 20, true, 40, "#ffff00", false, 0);
+	LabelMgr.setLabelShow(oname, true);
+	
+	desc = LabelMgr.labelScreen(description, 20, 65, true, 32, "#ffff00", false, 0);
+	LabelMgr.setLabelShow(desc, true);
+
+	if ( credits.length > 0) {
+		cr = LabelMgr.labelScreen(credits, 20, 100, true, 26, "#ffff00", false, 0);
+		LabelMgr.setLabelShow(cr, true);
+	} else {
+		cr = -1;
+	}
+}
+
+function deleteULCLabel() {
+	if (oname != -1) {
+		LabelMgr.deleteLabel(oname);
+		oname = -1;
+	}
+	if (desc != -1) {
+		LabelMgr.deleteLabel(desc);
+		desc = -1;
+	}
+	if (cr != -1) {
+		LabelMgr.deleteLabel(cr);
+		cr = -1;
+	}
+}
+
+
+
+function showConstellations() {
+	ConstellationMgr.setFlagArt(false);
+	ConstellationMgr.setFlagBoundaries(false);
+	ConstellationMgr.setFlagLines(false);
+	ConstellationMgr.setFlagLabels(false);
+
+	// ConstellationMgr.setFlagArt(false);
+	ConstellationMgr.setFlagBoundaries(false);
+	ConstellationMgr.setFlagLines(true);
+	ConstellationMgr.setFlagLabels(true);
+}
+
+
+LabelMgr.deleteAllLabels();
+core.clear("natural")
+core.setGuiVisible(true);
+core.setDiskViewport(false);
+core.setSelectedObjectInfo("None");
+
+GridLinesMgr.setFlagGridlines(false);
+NebulaMgr.setFlagHints(false);
+StelMovementMgr.setEquatorialMount(false);
+
+// core.setDate("now")
+// core.setDate("2025-01-12T22:00:00", "local")  //or  "2008-03-24T13:21:01"
+
+core.setObserverLocation( -94.6808,  38.6195,  300, 1,"Louisburg, KS", 'Earth'); // long, lat, alt
+
+// StelMovementMgr.resetInitViewPos();  // this works
+StelSkyDrawer.setCustomStarMagnitudeLimit(14);
+StelSkyDrawer.setFlagStarMagnitudeLimit(true);
+
+LandscapeMgr.setFlagCardinalPoints(true);
+LandscapeMgr.setFlagLabels(true);
+// LandscapeMgr.labelFontSize = 42;
+
+showConstellations();
+
+// starting date
+core.setDate("2023-08-12T22:00:00", "local");  // aug 10p,
+// slew to south and up view
+core.moveToAltAzi("42", "180");  // alt, azi -> sets south-facing and upward (ground shows a bit)
+
+// zoom out to wide view of sky
+StelMovementMgr.zoomTo(140, 1.5);  // fov, duration
+core.wait(1.5);
+
+core.setDate("2023-08-12T22:00:00", "local");  // aug 10p,
+core.moveToAltAzi("42", "180");
+
+zoomToObject("M57", 1.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+zoomToObject("M27", 1.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+core.setDate("2023-09-12T21:00:00", "local")  // sep 10p,
+core.moveToAltAzi("42", "180");
+
+zoomToObject("M13", 1.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+zoomToObject("M101", 1.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+core.setDate("2023-11-12T22:00:00", "local");  // nov 10p,
+core.moveToAltAzi("42", "180");
+
+zoomToObject("Helix Nebula", 2.0);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+core.setDate("2023-12-12T22:00:00", "local"); // dec, 10pm
+core.moveToAltAzi("42", "180");
+
+zoomToObject("M31", 3.0);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+zoomToObject("M45", 2.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+zoomToObject("Heart Nebula", 3.0);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+core.setDate("2024-1-12T22:00:00", "local"); // jan, 10pm
+core.moveToAltAzi("42", "180");
+
+zoomToObject("M42", 3.0);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+zoomToObject("Flame Nebula", 2.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+zoomToObject("Rosette Nebula", 2.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+core.setDate("2024-2-12T22:00:00", "local");  // feb, 10pm
+core.moveToAltAzi("42", "180");
+
+zoomToObject("Elephant's Trunk Nebula", 2.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+zoomToObject("The Wizard Nebula", 2.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+zoomToObject("California Nebula", 2.5);
+curAzi = core.getViewAzimuthAngle();
+zoomToHome(3, curAzi);
+
+core.setDate("2024-3-12T22:00:00", "local");  // mar, 10pm
+core.moveToAltAzi("42", "180");
+
+
+core.selectObjectByName("", false);
+core.selectObjectByName("m42", true);
+map = core.getSelectedObjectInfo();
+if (map.found == false) {
+	core.debug("not found!")
+} else {
+	//core.debug(core.mapToString(map));
+	core.debug(map['localized-name'])
+}
+
+StelMovementMgr.setAutoMoveDuration(1.0);
+StelMovementMgr.setFlagTracking(true);
+core.moveToSelectedObject(5.0)
+StelMovementMgr.zoomTo(2.0, 10);
+
+core.clear("natural");
+GridLinesMgr.setFlagEquatorGrid(false);
+NebulaMgr.setFlagHints(false);
+var constellations = ConstellationMgr.getConstellationsEnglishNames();
+ConstellationMgr.setFlagArt(false);
+ConstellationMgr.setFlagBoundaries(false);
+ConstellationMgr.setFlagLines(false);
+ConstellationMgr.setFlagLabels(false);
+core.setGuiVisible(false);
+var id = LabelMgr.labelScreen("Press Ctrl+T to un-hide the toolbar", 100,100, false, 20);
+LabelMgr.setLabelShow(id, true);
+core.wait(4);
+LabelMgr.setLabelShow(id, false);
+LabelMgr.deleteLabel(id);
+ConstellationMgr.setFlagBoundaries(true);
+ConstellationMgr.setFlagLines(true);
+ConstellationMgr.setFlagLabels(true);
+ConstellationMgr.setFlagIsolateSelected(true);
+
+ConstellationMgr.setFontSize(30);
+
+for (i=0; i<constellations.length; i++)
+{
+	objName = constellations[i];
+	core.selectConstellationByName(objName);
+	StelMovementMgr.autoZoomIn(6);
+	core.wait(1);
+	StelMovementMgr.zoomTo(60,8);
+	core.wait(1);
+	ConstellationMgr.setFlagArt(true);
+	core.wait(5);
+	ConstellationMgr.setFlagArt(false);
+	StelMovementMgr.zoomTo(130, 2);
+	core.wait(2.0)
+}
+
+core.setGuiVisible(true);
+core.clear("natural");
